@@ -4,6 +4,7 @@ import { useRoster } from '../context/RosterContext';
 import { Modal } from '../components/Modal';
 import { getDepartmentName } from '../utils/helpers';
 import type { Nurse } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 const emptyNurse: Omit<Nurse, 'id'> = {
   name: '',
@@ -17,6 +18,8 @@ const emptyNurse: Omit<Nurse, 'id'> = {
 
 export function Staff() {
   const { state, dispatch } = useRoster();
+  const { user } = useAuth();
+  const canManage = user?.role === 'admin' || user?.role === 'scheduler';
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Nurse | null>(null);
@@ -62,13 +65,13 @@ export function Staff() {
           <h1 className="text-2xl font-bold text-gray-900">Staff Management</h1>
           <p className="text-gray-500 mt-1">Manage nurses and care staff</p>
         </div>
-        <button
+        {canManage && <button
           onClick={openAdd}
           className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2.5 rounded-lg hover:bg-primary-700 transition-colors font-medium"
         >
           <Plus size={20} />
           Add Staff
-        </button>
+        </button>}
       </div>
 
       <div className="relative mb-6">
@@ -118,12 +121,10 @@ export function Staff() {
                   </span>
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <button onClick={() => openEdit(nurse)} className="p-1.5 text-gray-400 hover:text-primary-600 rounded">
-                    <Pencil size={18} />
-                  </button>
-                  <button onClick={() => handleDelete(nurse.id)} className="p-1.5 text-gray-400 hover:text-red-600 rounded ml-1">
-                    <Trash2 size={18} />
-                  </button>
+                  {canManage && <>
+                    <button onClick={() => openEdit(nurse)} className="p-1.5 text-gray-400 hover:text-primary-600 rounded"><Pencil size={18} /></button>
+                    <button onClick={() => handleDelete(nurse.id)} className="p-1.5 text-gray-400 hover:text-red-600 rounded ml-1"><Trash2 size={18} /></button>
+                  </>}
                 </td>
               </tr>
             ))}

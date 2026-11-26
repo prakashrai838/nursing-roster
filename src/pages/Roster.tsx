@@ -12,9 +12,12 @@ import { ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
 import { useRoster } from '../context/RosterContext';
 import { Modal } from '../components/Modal';
 import { isOnLeave } from '../utils/helpers';
+import { useAuth } from '../context/AuthContext';
 
 export function Roster() {
   const { state, dispatch } = useRoster();
+  const { user } = useAuth();
+  const canManage = user?.role === 'admin' || user?.role === 'scheduler';
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [deptFilter, setDeptFilter] = useState('all');
   const [modalOpen, setModalOpen] = useState(false);
@@ -154,6 +157,7 @@ export function Roster() {
                     <td key={day.toISOString()} className="px-1 py-1">
                       <button
                         onClick={() => openAssign(nurse.id, day)}
+                        disabled={!canManage}
                         className={`w-full h-16 rounded-lg border-2 border-dashed transition-all text-xs ${
                           onLeave
                             ? 'border-red-200 bg-red-50 text-red-500'

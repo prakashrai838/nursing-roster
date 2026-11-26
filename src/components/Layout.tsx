@@ -7,7 +7,10 @@ import {
   Building2,
   Palmtree,
   Stethoscope,
+  LogOut,
 } from 'lucide-react';
+import { useRoster } from '../context/RosterContext';
+import { useAuth } from '../context/AuthContext';
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -19,6 +22,8 @@ const navItems = [
 ];
 
 export function Layout() {
+  const { isLoading, ready, loadFailed, error, clearError, retry } = useRoster();
+  const { user, signOut } = useAuth();
   return (
     <div className="flex h-screen bg-gray-50">
       <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
@@ -53,11 +58,14 @@ export function Layout() {
           ))}
         </nav>
         <div className="px-6 py-4 border-t border-gray-100">
-          <p className="text-xs text-gray-400">Nursing Roster v1.0</p>
+          <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+          <p className="text-xs text-gray-400 capitalize mt-1">{user?.role}</p>
+          <button onClick={() => void signOut()} className="mt-3 flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900"><LogOut size={16} /> Sign out</button>
         </div>
       </aside>
       <main className="flex-1 overflow-auto">
-        <Outlet />
+        {error && <div role="alert" className="m-4 flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"><span>{error}</span><button onClick={clearError} aria-label="Dismiss error">×</button></div>}
+        {isLoading ? <div className="p-8 text-gray-500">Loading roster data…</div> : !ready || loadFailed ? <div className="p-8"><p className="text-gray-700 mb-3">Roster data could not be loaded. Changes are disabled until the server connection is restored.</p><button onClick={retry} className="px-4 py-2 bg-primary-600 text-white rounded-lg">Retry</button></div> : <Outlet />}
       </main>
     </div>
   );

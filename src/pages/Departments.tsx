@@ -3,11 +3,14 @@ import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { useRoster } from '../context/RosterContext';
 import { Modal } from '../components/Modal';
 import type { Department } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 const emptyDept: Omit<Department, 'id'> = { name: '', description: '' };
 
 export function Departments() {
   const { state, dispatch } = useRoster();
+  const { user } = useAuth();
+  const canManage = user?.role === 'admin' || user?.role === 'scheduler';
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Department | null>(null);
   const [form, setForm] = useState(emptyDept);
@@ -52,10 +55,10 @@ export function Departments() {
           <h1 className="text-2xl font-bold text-gray-900">Departments</h1>
           <p className="text-gray-500 mt-1">Manage hospital wards and units</p>
         </div>
-        <button onClick={openAdd}
+        {canManage && <button onClick={openAdd}
           className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2.5 rounded-lg hover:bg-primary-700 font-medium">
           <Plus size={20} /> Add Department
-        </button>
+        </button>}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -68,14 +71,14 @@ export function Departments() {
                   <h3 className="font-semibold text-gray-900">{dept.name}</h3>
                   <p className="text-sm text-gray-500 mt-1">{dept.description}</p>
                 </div>
-                <div className="flex gap-1">
+                {canManage && <div className="flex gap-1">
                   <button onClick={() => openEdit(dept)} className="p-1.5 text-gray-400 hover:text-primary-600 rounded">
                     <Pencil size={16} />
                   </button>
                   <button onClick={() => handleDelete(dept.id)} className="p-1.5 text-gray-400 hover:text-red-600 rounded">
                     <Trash2 size={16} />
                   </button>
-                </div>
+                </div>}
               </div>
               <div className="mt-4 pt-4 border-t border-gray-100">
                 <span className="text-sm text-gray-500">{staffCount} active staff</span>

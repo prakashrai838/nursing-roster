@@ -4,6 +4,7 @@ import { useRoster } from '../context/RosterContext';
 import { Modal } from '../components/Modal';
 import { getNurseName, formatDate } from '../utils/helpers';
 import type { LeaveRequest } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 const emptyLeave: Omit<LeaveRequest, 'id'> = {
   nurseId: '',
@@ -22,6 +23,7 @@ const statusStyles = {
 
 export function Leave() {
   const { state, dispatch } = useRoster();
+  const { user } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
   const [filter, setFilter] = useState<'all' | LeaveRequest['status']>('all');
   const [form, setForm] = useState(emptyLeave);
@@ -102,7 +104,7 @@ export function Leave() {
                   </span>
                 </td>
                 <td className="px-6 py-4 text-right">
-                  {leave.status === 'pending' && (
+                  {user?.role !== 'nurse' && leave.status === 'pending' && (
                     <>
                       <button onClick={() => updateStatus(leave, 'approved')}
                         className="p-1.5 text-gray-400 hover:text-emerald-600 rounded" title="Approve">
@@ -114,10 +116,10 @@ export function Leave() {
                       </button>
                     </>
                   )}
-                  <button onClick={() => handleDelete(leave.id)}
+                  {(user?.role !== 'nurse' || leave.status === 'pending') && <button onClick={() => handleDelete(leave.id)}
                     className="p-1.5 text-gray-400 hover:text-red-600 rounded ml-1">
                     <Trash2 size={18} />
-                  </button>
+                  </button>}
                 </td>
               </tr>
             ))}
